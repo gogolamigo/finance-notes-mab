@@ -1,0 +1,86 @@
+name: Restore and visually verify approved original
+on:
+  push:
+    branches: [repair/original-design-20261112]
+    paths: [.github/workflows/restore-preview.yml]
+permissions:
+  contents: write
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Restore frozen source and verify development checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          python .github/qa/restore.py
+          node tests/check.mjs | tee evidence/static-checks.txt
+          node scripts/build.mjs | tee evidence/build-checks.txt
+      - name: Prepare isolated browser runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install playwright==1.57.0 Pillow==11.3.0
+          python -m playwright install --with-deps chromium
+          sudo apt-get install -y fonts-noto-cjk
+          fc-list :lang=zh > evidence/browser-fonts.txt
+      - name: Compare approved original against subpath preview and exercise interactions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m http.server 8765 --bind 127.0.0.1 --directory preview > evidence/server.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          python - <<'PY'
+          from urllib.request import urlopen
+          import time
+          for attempt in range(20):
+              try:
+                  with urlopen('http://127.0.0.1:8765/finance-notes-mab/',timeout=2) as r:
+                      assert r.status==200
+                  break
+              except OSError:
+                  time.sleep(0.2)
+          else:
+              raise RuntimeError('Preview runtime unavailable')
+          PY
+          python .github/qa/browser_qa.py --source https://finance-notes-hongji-2026.amusingbroom4.chatgpt.site/ --target http://127.0.0.1:8765/finance-notes-mab/ --negative https://gogolamigo.github.io/finance-notes-mab/ --output evidence/browser
+      - name: Stage clean release branch only after successful QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json,subprocess,zipfile
+          from pathlib import Path
+          expected_main='fc598c64b01879e3f2ace85a58b7d00fb438e346'
+          release_branch='repair/approved-original-release-20261112'
+          def git(*args):return subprocess.check_output(['git',*args],text=True).strip()
+          manifest=json.loads(Path('evidence/restoration.json').read_text())
+          qa=json.loads(Path('evidence/browser/report.json').read_text())
+          assert qa['status']=='PASS' and qa['checks'] and all(c['passed'] for c in qa['checks'])
+          assert qa['negative'] and not qa['negative']['same']
+          for name,digest in manifest['files'].items():assert hashlib.sha256(Path(name).read_bytes()).hexdigest()==digest
+          git('fetch','origin','main')
+          assert git('rev-parse','FETCH_HEAD')==expected_main, 'Main changed; stop without publishing'
+          git('read-tree',expected_main)
+          git('add','--',*manifest['files'].keys())
+          git('rm','--cached','--ignore-unmatch','docs.css','favicon.svg')
+          tree=git('write-tree')
+          commit=git('-c','user.name=gogolamigo','-c','user.email=343642301+gogolamigo@users.noreply.github.com','commit-tree',tree,'-p',expected_main,'-m','Restore approved original finance notes design with verified visual parity')
+          git('push','origin',commit+':refs/heads/'+release_branch)
+          record={'commit':commit,'tree':tree,'parent':expected_main,'branch':release_branch,'main_modified':False}
+          Path('evidence/release.json').write_text(json.dumps(record,indent=2))
+          with zipfile.ZipFile('evidence/candidate-source.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for name in manifest['files']:z.write(name,name)
+          print(json.dumps(record))
+          PY
+      - name: Preserve actual screenshots, observations, and final source
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: restoration-preview-evidence
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 7
