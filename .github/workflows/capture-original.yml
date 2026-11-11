@@ -1,0 +1,88 @@
+name: Capture approved design for restoration
+on:
+  push:
+    branches: [repair/original-design-20261112]
+    paths: [.github/workflows/capture-original.yml]
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fetch approved public site and linked static resources
+        shell: bash
+        run: |
+          python - <<'PY_CAPTURE'
+          import hashlib
+          import json
+          import re
+          from collections import deque
+          from html.parser import HTMLParser
+          from pathlib import Path, PurePosixPath
+          from urllib.parse import urljoin, urlsplit, urldefrag, unquote
+          from urllib.request import Request, urlopen
+          
+          ORIGIN = 'https://finance-notes-hongji-2026.amusingbroom4.chatgpt.site/'
+          OUTPUT = Path('capture')
+          EXTENSIONS = {'.html', '.css', '.js', '.mjs', '.md', '.svg', '.json', '.png', '.jpg', '.jpeg', '.webp'}
+          class Links(HTMLParser):
+              def __init__(self):
+                  super().__init__(); self.urls=[]
+              def handle_starttag(self, tag, attrs):
+                  attrs=dict(attrs)
+                  for key in ('href', 'src'):
+                      if key in attrs: self.urls.append(attrs[key])
+          
+          def eligible(base, link):
+              if not link or link.startswith(('#','data:','mailto:','javascript:')): return None
+              url=urldefrag(urljoin(base,link))[0]
+              u=urlsplit(url); o=urlsplit(ORIGIN)
+              if (u.scheme,u.netloc)!=(o.scheme,o.netloc): return None
+              p=PurePosixPath(unquote(u.path))
+              if '..' in p.parts or '\\' in str(p): return None
+              if u.path != '/' and p.suffix.lower() not in EXTENSIONS: return None
+              return url
+          
+          def capture():
+              OUTPUT.mkdir(parents=True,exist_ok=True)
+              q=deque([ORIGIN]); seen=set(); entries=[]; total=0
+              while q:
+                  url=q.popleft()
+                  if url in seen: continue
+                  if len(seen)>=60: raise RuntimeError('Capture resource limit exceeded')
+                  seen.add(url)
+                  with urlopen(Request(url,headers={'User-Agent':'FinanceNotes-Restore-QA/1.0'}),timeout=25) as r:
+                      if urlsplit(r.url).netloc!=urlsplit(ORIGIN).netloc: raise RuntimeError('Unexpected cross-origin redirect')
+                      data=r.read(2_000_001)
+                      if len(data)>2_000_000: raise RuntimeError('Resource too large')
+                      total+=len(data)
+                      if total>15_000_000: raise RuntimeError('Capture size limit exceeded')
+                      content_type=r.headers.get('Content-Type','')
+                      path=urlsplit(url).path.lstrip('/') or 'index.html'
+                      p=OUTPUT/'site'/unquote(path)
+                      p.parent.mkdir(parents=True,exist_ok=True); p.write_bytes(data)
+                      entries.append({'url':url,'path':str(p.relative_to(OUTPUT)), 'status':r.status,'content_type':content_type,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})
+                      if '.html' in p.suffix or 'text/html' in content_type:
+                          parser=Links(); parser.feed(data.decode('utf-8-sig'))
+                          for link in parser.urls:
+                              u=eligible(url,link)
+                              if u: q.append(u)
+                      elif p.suffix=='.css':
+                          for link in re.findall(r'url\([\s\"\x27]*([^\s\"\x27)]+)',data.decode('utf-8-sig')):
+                              u=eligible(url,link)
+                              if u:q.append(u)
+                      print('CAPTURED',path,len(data),flush=True)
+              report={'origin':ORIGIN,'entries':entries,'captured_count':len(entries),'captured_bytes':total}
+              (OUTPUT/'manifest.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+              print(json.dumps(report,ensure_ascii=False,indent=2))
+          
+          if __name__=='__main__': capture()
+          PY_CAPTURE
+      - name: Save exact captured source and provenance
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: approved-original-source
+          path: capture/
+          if-no-files-found: error
+          retention-days: 7
