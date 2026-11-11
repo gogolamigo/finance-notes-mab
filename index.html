@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="金融概念小教室：從生活問題出發，認識貨幣時間價值、風險與報酬、債券價格與分散投資。">
+  <title>金融概念小教室｜把金融，想明白。</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="math.js"></script>
+  <script defer src="content.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要內容</a>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="#home" aria-label="金融概念小教室首頁">
+        <span class="brand-icon" aria-hidden="true"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5c-3-2-7-2-9-1v15c2-1 6-1 9 1m0-15c3-2 7-2 9-1v15c-2-1-6-1-9 1m0-15v15"/></svg></span>
+        <span class="brand-words"><strong>金融概念小教室</strong><small>FINANCE NOTES</small></span>
+      </a>
+      <nav class="main-nav" aria-label="主要導覽">
+        <a href="#notebook">概念筆記</a><a href="#method">學習方式</a><a href="#about">關於專案 <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <div id="home-view">
+      <section class="hero" id="home" aria-labelledby="site-headline"><div class="shell hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow hero-eyebrow"><i aria-hidden="true"></i> 給大學生的金融入門筆記</p>
+          <h1 id="site-headline">把金融，<br><em>想明白。</em></h1>
+          <p class="hero-intro">從「為什麼」開始，讓公式有了意義。<br>用簡單的例子，理解金錢、時間與風險。</p>
+          <div class="hero-cta"><a class="btn primary" href="#notebook">開始閱讀 <span aria-hidden="true">↗</span></a><span>一個問題，一篇筆記。</span></div>
+          <div class="hero-meta"><strong>4</strong> 篇核心概念 <b aria-hidden="true"></b> 原創示例 <b aria-hidden="true"></b> 附參考來源</div>
+        </div>
+        <div class="concept-panel" aria-label="複利教學示例"><div class="panel-top"><span class="overline">CONCEPT 01</span><span class="panel-tag">金錢 × 時間</span></div>
+          <h2>讓時間，<br>成為金額的一部分。</h2>
+          <div class="number-compare"><div><span class="small">現在的本金</span><strong><small>NT$</small> 10,000</strong></div><div class="number-arrow" aria-hidden="true">↘</div><div><span class="small">2 年後的金額</span><strong class="lime"><small>NT$</small> 11,025</strong></div></div>
+          <div class="panel-bottom"><div class="plus-circle" aria-hidden="true">＋</div><div class="panel-added"><strong>NT$1,025</strong><span>兩年累積利息</span></div><div class="panel-rate"><span>年利率</span><strong>5%</strong></div></div>
+          <div class="panel-footer"><span>教學假設：每年複利、利息留存</span><a href="#lesson/time-value">看懂這個例子 ↗</a></div>
+        </div>
+      </div></section>
+      <section class="notebook" id="notebook" aria-labelledby="notebook-title"><div class="shell">
+        <div class="section-heading"><div><p class="overline dark">THE NOTEBOOK</p><h2 id="notebook-title">從一個觀念開始</h2></div><p>先建立直覺，再用例子驗證。</p></div>
+        <div class="filters"><div class="filter-buttons" role="group" aria-label="依分類篩選">
+          <button type="button" data-filter="全部" class="active" aria-pressed="true">全部</button><button type="button" data-filter="時間與價值" aria-pressed="false">時間與價值</button><button type="button" data-filter="風險與配置" aria-pressed="false">風險與配置</button><button type="button" data-filter="債券入門" aria-pressed="false">債券入門</button>
+        </div><label class="searchbox"><span class="sr-only">搜尋概念、關鍵字</span><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="搜尋概念、關鍵字…" autocomplete="off"></label></div>
+        <p class="results-count" id="results-count" aria-live="polite">全部 4 篇筆記</p>
+        <div class="lesson-grid" id="lesson-grid" aria-label="金融概念筆記清單"></div>
+        <div class="empty-state" id="empty-state" hidden><span aria-hidden="true">∅</span><h3>目前沒有符合的筆記</h3><p>試試其他關鍵字，或回到全部概念。</p><button class="btn secondary" type="button" id="reset-filter">顯示全部概念</button></div>
+        <div class="coming-soon" id="coming-soon"><div class="coming-icon" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5c-3-2-7-2-9-1v15c2-1 6-1 9 1m0-15c3-2 7-2 9-1v15c-2-1-6-1-9 1m0-15v15"/></svg></div><div><strong>更多金融筆記，陸續整理中。</strong><p>新的觀念會沿著生活問題、公式與例子，慢慢補進這本筆記。</p></div></div>
+      </div></section>
+      <section class="method" id="method" aria-labelledby="method-title"><div class="shell method-grid"><div><p class="overline dark">A LITTLE AT A TIME</p><h2 id="method-title">理解，比背下來<br>更有用。</h2><p class="method-intro">每篇沿著同一條線閱讀，<br>把抽象概念變成能說清楚的知識。</p></div><div class="step-list"><div class="step"><span>01</span><div><h3>先問一個問題</h3><p>從生活情境出發，弄懂這個觀念為什麼值得學。</p></div></div><div class="step"><span>02</span><div><h3>讓公式落在例子上</h3><p>交代符號與假設，用自編數值一步步看出關係。</p></div></div><div class="step"><span>03</span><div><h3>確認自己真的理解</h3><p>辨認常見誤解，再用一題四選一檢查自己的判斷。</p></div></div></div></div></section>
+      <section class="about" id="about" aria-labelledby="about-title"><div class="shell about-grid"><div class="about-copy"><p class="overline dark">ABOUT THIS PROJECT</p><h2 id="about-title">一本可以持續增加的筆記。</h2><p>我希望把金融概念整理成短而清楚的內容，讓讀者能從直覺走到公式，也知道公式適用的條件。</p><p>專案以 AGENTS.md 固定文章格式、資料結構與開發方式，讓 AI 協助新增內容時，仍能維持一致的說明品質。例子使用自編假設，並附上可查閱的參考來源。</p><div class="about-links"><a href="agents.html">閱讀專案規則 ↗</a><a href="readme.html">閱讀專案介紹 ↗</a></div></div><div class="author-card"><div class="author-avatar" aria-hidden="true">林</div><strong>林泓基</strong><p>整理觀念，也練習把事情<br>清楚地交辦給 AI。</p></div></div></section>
+    </div>
+    <div id="lesson-view" hidden><div class="shell lesson-shell"><a class="back-link" href="#notebook">← 返回概念筆記</a><div class="lesson-layout"><aside class="lesson-side"><span class="overline dark">IN THIS NOTE</span><nav id="lesson-toc" aria-label="本篇章節導覽"></nav></aside><article class="lesson-article" id="lesson-article" tabindex="-1"></article></div></div></div>
+  </main>
+  <footer class="footer"><div class="shell footer-inner"><span>金融概念小教室 <span class="slash">／</span> FINANCE NOTES</span><span>2026 · 學習筆記 · 案例為教學假設</span></div></footer>
+</body>
+</html>

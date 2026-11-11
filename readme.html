@@ -1,0 +1,27 @@
+<!doctype html><html lang="zh-Hant-TW"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="金融概念小教室的公開專案文件"><title>專案介紹｜金融概念小教室</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="docs.css"></head><body><a class="skip-link" href="#doc-main">跳到主要內容</a><header class="site-header"><div class="shell header-inner"><a class="brand" href="index.html#home"><span class="brand-icon" aria-hidden="true">▤</span><span class="brand-words"><strong>金融概念小教室</strong><small>FINANCE NOTES</small></span></a><nav class="main-nav" aria-label="文件導覽"><a href="index.html#notebook">概念筆記</a><a href="agents.html">專案規則</a><a href="readme.html">專案介紹</a></nav></div></header><main id="doc-main" class="doc-main shell"><a class="back-link" href="index.html#about">← 返回關於專案</a><div class="doc-label">PROJECT DOCUMENTATION · UTF-8</div><article class="markdown-body"><h1 id="金融概念小教室">金融概念小教室</h1>
+<p>金融概念小教室是一個以台灣繁體中文撰寫的金融入門網站。我想把課堂上常見的觀念整理成可以慢慢閱讀的短篇筆記，先說清楚直覺，再介紹公式、條件與自編例子，最後用一題四選一檢查理解。</p>
+<h2 id="網站內容">網站內容</h2>
+<ul>
+<li><strong>貨幣時間價值</strong>：單筆複利、現值與終值，附本金、利率、年數試算。</li>
+<li><strong>風險與報酬</strong>：用簡單的機率情境理解期望報酬，認識平均值與實際結果的差別。</li>
+<li><strong>債券價格與市場利率</strong>：理解固定票息與市場要求報酬率，以及債券價格的反向關係。</li>
+<li><strong>分散投資</strong>：了解資產配置如何影響組合報酬，以及分散效果的限制。</li>
+</ul>
+<p>網站提供文章分類、關鍵字搜尋、逐篇導覽、四選一練習、參考來源及適合窄螢幕閱讀的版面。案例均為自編教學假設，不構成投資建議。</p>
+<h2 id="專案規則">專案規則</h2>
+<p><code>AGENTS.md</code> 是這個專案的規則文件，包含網站目的、技術與檔案位置、視覺與閱讀架構、文章資料欄位、計算假設、互動方式、新增內容流程及驗收標準。新增文章時，先閱讀規則，再修改 <code>content.js</code> 內的資料，不需要為每篇複製新的 HTML、CSS 或互動程式。</p>
+<h2 id="檔案結構">檔案結構</h2>
+<div class="md-table-scroll"><table><thead><tr><th>檔案</th><th>用途</th></tr></thead><tbody><tr><td><code>AGENTS.md</code></td><td>專案規則與新增內容工作流程</td></tr><tr><td><code>README.md</code></td><td>專案介紹與實際延伸紀錄</td></tr><tr><td><code>index.html</code></td><td>網站首頁、學習方式、文章呈現外框</td></tr><tr><td><code>styles.css</code></td><td>網站色彩、字級與響應式版面</td></tr><tr><td><code>content.js</code></td><td>四篇金融筆記的資料</td></tr><tr><td><code>app.js</code></td><td>搜尋、分類、文章切換、自我檢核與互動</td></tr><tr><td><code>math.js</code></td><td>複利計算與輸入驗證</td></tr><tr><td><code>agents.html</code>、<code>readme.html</code></td><td>可直接閱讀的規則與介紹網頁，由建置程式產生</td></tr><tr><td><code>tests/check.mjs</code></td><td>原始內容、功能與資料檢查</td></tr><tr><td><code>scripts/build.mjs</code></td><td>建立發布目錄及文件閱讀頁</td></tr><tr><td><code>dist/</code></td><td>建置生成的網站檔案，非編輯來源</td></tr></tbody></table></div>
+<h2 id="本機閱讀與測試">本機閱讀與測試</h2>
+<p>需要 Node.js 18 以上。網站只使用 HTML、CSS 與原生 JavaScript，<strong>訪客不需要安裝 Node.js</strong>，也不需要登入或申請 API 金鑰。</p>
+<p>1. 於專案根目錄執行 <code>node tests/check.mjs</code>。</p>
+<p>2. 執行 <code>node scripts/build.mjs</code> 產生 <code>dist/</code> 與文件閱讀頁。</p>
+<p>3. 在專案根目錄啟動靜態伺服器，例如 <code>python -m http.server 8000</code>，然後瀏覽 <code>http://localhost:8000/</code>。</p>
+<p><code>dist/</code> 中的檔案也可直接部署到靜態網站服務。GitHub Pages 可以使用預設分支的根目錄；本專案保留相對資源路徑，適用於儲存庫子路徑。</p>
+<h2 id="如何讓-ai-繼續新增內容">如何讓 AI 繼續新增內容</h2>
+<p>我先完成貨幣時間價值、風險與報酬、債券價格與市場利率三篇筆記，再依同一份 <code>AGENTS.md</code> 所定的資料格式與顯示方式，加入第四篇「分散投資」。文章會自動出現在相同的卡片清單、分類與前後篇導覽中，也沿用公式、例子、常見誤解、四選一及來源的結構。這證明規則的用途不只是讓 AI 完成一次性的網頁，而是協助後續內容使用一致的規格。</p>
+<p>後續如果要新增其他金融概念，我會先確認資料與例子，再依規則加入一筆文章、執行測試並在瀏覽器檢查功能；不需要重新設計整個網站。</p>
+<h2 id="公開資訊與來源">公開資訊與來源</h2>
+<p>公開網頁、原始碼和文件只保留作者署名 <strong>林泓基</strong>，不展示個人學籍資料。各篇文章另附來源，主要引用 OpenStax 與美國證券交易委員會（SEC）Investor.gov 的投資教育內容，並以自己的方式重述概念。</p>
+<p>作者：林泓基</p>
+</article><div class="doc-bottom"><a href="AGENTS.md" download>下載 AGENTS.md</a><a href="README.md" download>下載 README.md</a></div></main><footer class="footer"><div class="shell footer-inner"><span>金融概念小教室 ／ FINANCE NOTES</span><span>2026 · 作者 林泓基</span></div></footer></body></html>
