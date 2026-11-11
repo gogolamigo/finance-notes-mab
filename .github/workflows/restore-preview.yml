@@ -2,7 +2,7 @@ name: Restore and visually verify approved original
 on:
   push:
     branches: [repair/original-design-20261112]
-    paths: [.github/workflows/restore-preview.yml]
+    paths: [.github/workflows/restore-preview.yml, .github/qa/**, scripts/**, tests/**]
 permissions:
   contents: write
 jobs:
