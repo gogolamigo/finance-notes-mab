@@ -1,193 +1,153 @@
 (function () {
   'use strict';
-  const lessons = Array.isArray(window.FINANCE_LESSONS) ? [...window.FINANCE_LESSONS].sort((a, b) => a.order - b.order) : [];
-  const calculateCompound = window.FINANCE_MATH?.calculateCompound;
+  const lessons = [...window.FINANCE_LESSONS].sort((a, b) => a.order - b.order);
   const home = document.getElementById('home-view');
   const lessonView = document.getElementById('lesson-view');
   const grid = document.getElementById('lesson-grid');
-  const count = document.getElementById('results-count');
-  const search = document.getElementById('search');
-  const empty = document.getElementById('empty-state');
-  const comingSoon = document.getElementById('coming-soon');
-  let category = '全部';
+  const search = document.getElementById('lesson-search');
+  const filters = document.getElementById('category-filters');
+  const resultCount = document.getElementById('result-count');
+  const emptyState = document.getElementById('empty-state');
+  const continuation = document.getElementById('notebook-continuation');
+  let currentCategory = '全部';
+  const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const money = value => 'NT$' + new Intl.NumberFormat('en-US', {maximumFractionDigits:2}).format(value);
+  const pad = value => String(value).padStart(2, '0');
+  const validSource = url => { try { const parsed = new URL(url); return parsed.protocol === 'https:' ? parsed.href : '#'; } catch { return '#'; } };
+  const sections = [['intuition','核心直覺'],['formula','公式與符號'],['example','自編例子'],['mistakes','常見誤解'],['quiz','自我檢核'],['sources','參考來源']];
 
-  function el(tag, cls, str) {
-    const node = document.createElement(tag);
-    if (cls) node.className = cls;
-    if (str !== undefined && str !== null) node.textContent = String(str);
-    return node;
-  }
-  function add(parent, ...nodes) { nodes.forEach(n => parent.append(n)); return parent; }
-  function link(label, href, cls) { const node = el('a', cls, label); node.href = href; return node; }
-  function formatMoney(value) {
-    return 'NT$' + new Intl.NumberFormat('en-US', { maximumFractionDigits: 2, minimumFractionDigits: Number.isInteger(value) ? 0 : 2 }).format(value);
-  }
-  function formatSignedMoney(value) {
-    const eps = Math.abs(value) < 1e-8 ? 0 : value;
-    return (eps > 0 ? '＋' : eps < 0 ? '−' : '') + formatMoney(Math.abs(eps));
-  }
-  function createSection(parent, index, title, id) {
-    const section = el('section', 'lesson-section');
-    section.id = id;
-    const h = el('h2');
-    add(h, el('span', '', String(index).padStart(2, '0')), el('span', '', title));
-    section.append(h); parent.append(section); return section;
-  }
+  document.querySelectorAll('[data-lesson-count]').forEach(el => {el.textContent = lessons.length;});
+  ['全部', ...new Set(lessons.map(lesson => lesson.category))].forEach(category => {
+    const button = document.createElement('button');
+    button.type = 'button'; button.className = 'filter'; button.textContent = category;
+    button.setAttribute('aria-pressed', String(category === currentCategory));
+    button.addEventListener('click', () => {
+      currentCategory = category;
+      filters.querySelectorAll('button').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+      renderCards();
+    });
+    filters.append(button);
+  });
+
   function renderCards() {
-    const query = search.value.trim().toLocaleLowerCase('zh-Hant');
-    const selected = lessons.filter(item => (category === '全部' || item.category === category) &&
-      [item.title, item.summary, item.category, item.subtitle].join(' ').toLocaleLowerCase('zh-Hant').includes(query));
-    grid.replaceChildren();
-    selected.forEach(item => {
-      const card = link('', '#lesson/' + item.id, 'lesson-card');
-      const head = el('div', 'card-head');
-      add(head, el('span', 'card-number', String(item.order).padStart(2, '0')), el('span', 'card-category', item.category));
-      const bottom = el('div', 'card-bottom'); add(bottom, el('span', '', '觀念・例子・自我檢核'), el('span', '', '↗'));
-      add(card, head, el('h3', '', item.title), el('p', '', item.summary), bottom);
-      grid.append(card);
-    });
-    count.textContent = category === '全部' && !query ? '全部 ' + selected.length + ' 篇筆記' : '符合條件：' + selected.length + ' 篇筆記';
-    empty.hidden = selected.length !== 0;
-    comingSoon.hidden = category !== '全部' || Boolean(query);
-    const heroCount = document.querySelector('.hero-meta strong');
-    if (heroCount) heroCount.textContent = String(lessons.length);
+    const query = search.value.trim().toLocaleLowerCase();
+    const visible = lessons.filter(lesson => (currentCategory === '全部' || lesson.category === currentCategory) &&
+      [lesson.title, lesson.subtitle, lesson.summary, lesson.category].join(' ').toLocaleLowerCase().includes(query));
+    grid.innerHTML = visible.map(lesson => `<a class="lesson-card" href="#lesson/${escape(lesson.id)}" aria-label="閱讀：${escape(lesson.title)}"><div class="card-top"><span class="card-number">${pad(lesson.order)}</span><span class="category-tag">${escape(lesson.category)}</span></div><h3>${escape(lesson.title)}</h3><p>${escape(lesson.summary)}</p><div class="card-bottom"><span>觀念・例子・自我檢核</span><span class="card-arrow" aria-hidden="true">↗</span></div></a>`).join('');
+    resultCount.textContent = query || currentCategory !== '全部' ? `找到 ${visible.length} 篇筆記，共 ${lessons.length} 篇` : `全部 ${lessons.length} 篇筆記`;
+    emptyState.hidden = visible.length !== 0;
+    continuation.hidden = query !== '' || currentCategory !== '全部';
   }
-  function renderQuiz(target, quiz) {
-    const box = el('div', 'quiz-box');
-    add(box, el('p', 'quiz-question', quiz.question));
-    const fieldset = el('fieldset', 'quiz-choices');
-    const options = [];
-    quiz.options.forEach((option, i) => {
-      const label = el('label', 'quiz-choice');
-      const input = document.createElement('input');
-      input.type = 'radio'; input.name = 'lesson-quiz'; input.value = String(i);
-      label.append(input, document.createTextNode(String.fromCharCode(65+i) + '. ' + option.text));
-      fieldset.append(label);
-      options.push(input);
-    });
-    box.append(fieldset);
-    const actions = el('div', 'quiz-actions');
-    const check = el('button', 'btn primary', '確認答案 ↗'); check.type = 'button';
-    const reset = el('button', 'btn secondary', '重新作答'); reset.type = 'button';
-    add(actions, check, reset);
-    const status = el('p', 'quiz-message', '先選擇一個答案，再查看解析。');
-    status.setAttribute('role', 'status');
-    const feedback = el('div', 'quiz-feedback'); feedback.hidden = true;
-    add(box, actions, status, feedback); target.append(box);
-    check.addEventListener('click', () => {
-      const index = options.findIndex(n => n.checked);
-      if (index < 0) { status.textContent = '請先選擇一個答案。'; return; }
-      const isCorrect = index === quiz.answer;
-      status.textContent = isCorrect ? '答對了。' : '這題還可以再確認一次。';
-      feedback.replaceChildren();
-      feedback.append(el('strong', '', '正確答案：' + String.fromCharCode(65+quiz.answer)));
-      quiz.options.forEach((o, j) => {
-        const item = el('div', 'quiz-explanation'); add(item, el('b', '', String.fromCharCode(65+j) + '. '), document.createTextNode(o.explanation)); feedback.append(item);
-      });
-      feedback.hidden = false;
-      options.forEach(n => n.disabled = true);
-      check.disabled = true;
+  search.addEventListener('input', renderCards);
+  document.getElementById('reset-search').addEventListener('click', () => {
+    search.value = ''; currentCategory = '全部';
+    filters.querySelectorAll('button').forEach(item => item.setAttribute('aria-pressed', String(item.textContent === '全部')));
+    renderCards(); search.focus();
+  });
+
+  function sectionHeading(index) {
+    return `<h2><span class="section-number">${pad(index + 1)}</span>${sections[index][1]}</h2>`;
+  }
+
+  function calculatorMarkup() {
+    return `<div class="calculator"><h3>換一組數字，試著算算看</h3><p>單筆本金、固定年利率，每年複利一次。</p><div class="calculator-fields"><label>本金（NT$）<input id="calc-principal" type="number" min="0" max="100000000" step="any" value="10000" inputmode="decimal" aria-describedby="calc-error"></label><label>年利率（%）<input id="calc-rate" type="number" min="-50" max="50" step="any" value="5" inputmode="decimal" aria-describedby="calc-error"></label><label>年數<input id="calc-years" type="number" min="0" max="50" step="1" value="2" inputmode="numeric" aria-describedby="calc-error"></label></div><p class="calc-error" id="calc-error" role="status" aria-live="polite" hidden></p><div class="calc-output" id="calc-output" aria-live="polite"><div><span>期末預估金額</span><strong id="calc-future"></strong></div><div><span id="calc-interest-label">累積收益</span><strong id="calc-interest"></strong></div></div><p class="calc-assumption">範圍：本金 0～1 億元；年利率 −50%～50%；年數 0～50 整數。利息留存，無額外投入或提領，忽略稅費；數值是計算假設。</p></div>`;
+  }
+
+  function renderLesson(lesson) {
+    const index = lessons.indexOf(lesson);
+    const previous = lessons[index - 1];
+    const next = lessons[index + 1];
+    document.title = `${lesson.title}｜金融概念小教室`;
+    lessonView.innerHTML = `<div class="shell article-shell"><a class="back-link" href="#library">← 返回概念筆記</a><div class="article-layout"><aside class="article-sidebar" aria-label="本篇章節"><p class="eyebrow">IN THIS NOTE</p><nav class="toc">${sections.map(([id,label],i) => `<button type="button" data-scroll="section-${id}">${pad(i+1)} &nbsp; ${label}</button>`).join('')}</nav><p class="sidebar-note">讀懂一個觀念，<br>也練習說清楚為什麼。</p></aside><article class="article"><header><div class="article-kicker"><span>NOTE ${pad(lesson.order)}</span><span class="category-tag">${escape(lesson.category)}</span></div><h1 tabindex="-1" id="lesson-heading">${escape(lesson.title)}</h1><p class="article-subtitle">${escape(lesson.subtitle)}</p></header><div class="question-box"><small>先想一個問題</small><p>${escape(lesson.question)}</p></div>
+      <section class="article-section" id="section-intuition">${sectionHeading(0)}${lesson.intro.map(p=>`<p>${escape(p)}</p>`).join('')}<div class="takeaway"><strong>帶走這個觀念：</strong>${escape(lesson.takeaway)}</div></section>
+      <section class="article-section" id="section-formula">${sectionHeading(1)}<div class="formula-box"><p class="formula">${escape(lesson.formula.expression)}</p><dl class="symbol-list">${lesson.formula.symbols.map(s=>`<div><dt>${escape(s.symbol)}</dt><dd>${escape(s.meaning)}</dd></div>`).join('')}</dl></div><div class="assumptions"><h3>使用前，先確認假設</h3><ul>${lesson.formula.assumptions.map(a=>`<li>${escape(a)}</li>`).join('')}</ul></div></section>
+      <section class="article-section" id="section-example">${sectionHeading(2)}<p>${escape(lesson.example.intro)}</p><div class="table-wrap" tabindex="0" role="region" aria-label="${escape(lesson.title)}自編例子表格"><table><thead><tr>${lesson.example.headers.map(h=>`<th scope="col">${escape(h)}</th>`).join('')}</tr></thead><tbody>${lesson.example.rows.map(row=>`<tr>${row.map(cell=>`<td>${escape(cell)}</td>`).join('')}</tr>`).join('')}</tbody></table></div><p class="example-conclusion">${escape(lesson.example.conclusion)}</p><p class="example-note">${escape(lesson.example.note)}</p>${lesson.interactive === 'compound' ? calculatorMarkup() : ''}</section>
+      <section class="article-section" id="section-mistakes">${sectionHeading(3)}<div class="mistake-list">${lesson.mistakes.map((m,i)=>`<div class="mistake"><h3><span>${i+1}.</span>${escape(m.myth)}</h3><p>${escape(m.fact)}</p></div>`).join('')}</div></section>
+      <section class="article-section" id="section-quiz">${sectionHeading(4)}<form class="quiz-panel" id="quiz-form"><fieldset><legend>${escape(lesson.quiz.question)}</legend><div class="quiz-options">${lesson.quiz.options.map((option,i)=>`<label class="quiz-option"><input type="radio" name="quiz-answer" value="${i}"><span class="option-letter">${'ABCD'[i]}.</span><span>${escape(option.text)}</span></label>`).join('')}</div></fieldset><div class="quiz-controls"><button class="button primary" type="submit" id="quiz-submit" disabled>確認答案 <span aria-hidden="true">↗</span></button><button class="button secondary" type="button" id="quiz-reset" hidden>重新作答</button><span class="quiz-hint" id="quiz-hint">先選擇一個答案，再查看解析。</span></div><p class="quiz-status" id="quiz-status" role="status" aria-live="polite" hidden></p><div class="answer-details" id="answer-details" hidden></div></form></section>
+      <section class="article-section" id="section-sources">${sectionHeading(5)}<ul class="source-list">${lesson.sources.map(source=>`<li><a href="${escape(validSource(source.url))}" target="_blank" rel="noopener noreferrer">${escape(source.publisher)} — ${escape(source.title)} ↗</a><small>${escape(source.supports)}</small></li>`).join('')}</ul></section>
+      <nav class="article-pagination" aria-label="其他筆記">${previous ? `<a href="#lesson/${escape(previous.id)}"><small>← 上一篇</small><strong>${escape(previous.title)}</strong></a>` : '<a href="#library"><small>← 概念清單</small><strong>查看全部筆記</strong></a>'}${next ? `<a href="#lesson/${escape(next.id)}"><small>下一篇 →</small><strong>${escape(next.title)}</strong></a>` : '<a href="#library"><small>回到概念清單 ↗</small><strong>查看全部筆記</strong></a>'}</nav></article></div></div>`;
+    lessonView.querySelectorAll('[data-scroll]').forEach(button => button.addEventListener('click', () => {
+      const target = document.getElementById(button.dataset.scroll); target.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',block:'start'});
+    }));
+    wireQuiz(lesson.quiz);
+    if (lesson.interactive === 'compound') wireCalculator();
+  }
+
+  function wireQuiz(quiz) {
+    const form = document.getElementById('quiz-form');
+    const submit = document.getElementById('quiz-submit');
+    const reset = document.getElementById('quiz-reset');
+    const status = document.getElementById('quiz-status');
+    const details = document.getElementById('answer-details');
+    const hint = document.getElementById('quiz-hint');
+    let answered = false;
+    form.addEventListener('change', () => { if (!answered) submit.disabled = !form.querySelector('input:checked'); });
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      const selected = form.querySelector('input:checked');
+      if (!selected || answered) return;
+      answered = true;
+      const correct = Number(selected.value) === quiz.answer;
+      status.className = `quiz-status ${correct ? 'correct' : 'incorrect'}`;
+      status.textContent = correct ? `答對了！正確答案是 ${'ABCD'[quiz.answer]}。` : `再想一下：正確答案是 ${'ABCD'[quiz.answer]}。你選了 ${'ABCD'[Number(selected.value)]}。`;
+      details.innerHTML = quiz.options.map((option,i)=>`<div class="answer-detail ${i===quiz.answer ? 'correct' : ''}"><strong>${'ABCD'[i]}${i===quiz.answer ? '・正確' : ''}</strong>${escape(option.explanation)}</div>`).join('');
+      status.hidden = false; details.hidden = false; reset.hidden = false; hint.hidden = true;
+      submit.disabled = true; form.querySelectorAll('input').forEach(input=>{input.disabled=true;});
     });
     reset.addEventListener('click', () => {
-      options.forEach(n => { n.disabled = false; n.checked = false; });
-      check.disabled = false; status.textContent = '先選擇一個答案，再查看解析。'; feedback.hidden = true;
-      feedback.replaceChildren();
+      form.reset(); answered = false; submit.disabled = true;
+      form.querySelectorAll('input').forEach(input=>{input.disabled=false;});
+      status.hidden = true; details.hidden = true; details.textContent = ''; reset.hidden = true; hint.hidden = false;
+      form.querySelector('input').focus();
     });
   }
-  function renderCalculator(target) {
-    const form = el('form', 'compound-calculator');
-    form.noValidate = true;
-    add(form, el('h3', '', '試算一下｜單筆複利'), el('p', '', '這是教學試算，不需要登入，也不儲存輸入資料。'));
-    const fields = el('div', 'calc-fields');
-    const inputs = {};
-    for (const [name, title, init] of [['principal','本金（NT$）','10000'], ['rate','年利率（%）','5'], ['years','年數','2']]) {
-      const label = el('label', '', title); const input = document.createElement('input');
-      input.type = 'number'; input.step = name === 'years' ? '1' : 'any'; input.value = init;
-      input.name = name; input.inputMode = 'decimal'; label.append(input); fields.append(label); inputs[name] = input;
-    }
-    const output = el('div', 'calc-output'); output.setAttribute('role','status'); output.setAttribute('aria-live','polite');
-    form.append(fields, output); target.append(form);
-    function calculate() {
-      const result = calculateCompound(inputs.principal.value, inputs.rate.value, inputs.years.value);
-      output.replaceChildren();
-      if (!result.ok) { output.className = 'calc-output calc-error'; output.textContent = result.error; return; }
-      output.className = 'calc-output';
-      add(output, document.createTextNode('期末估算金額：'), el('strong', '', formatMoney(result.finalValue)), el('div', '', '相較本金：' + formatSignedMoney(result.difference)));
-    }
-    form.addEventListener('submit', e => e.preventDefault());
-    Object.values(inputs).forEach(n => n.addEventListener('input', calculate));
-    calculate();
+
+  function wireCalculator() {
+    const fields = [document.getElementById('calc-principal'),document.getElementById('calc-rate'),document.getElementById('calc-years')];
+    const error = document.getElementById('calc-error');
+    const output = document.getElementById('calc-output');
+    const update = () => {
+      fields.forEach(field=>field.setAttribute('aria-invalid','false'));
+      try {
+        if (fields.some(field=>field.value.trim()==='')) throw new Error('請完整填寫本金、年利率與年數。');
+        const [principal,ratePercent,years] = fields.map(field=>Number(field.value));
+        const result = window.FinanceMath.compound({principal,ratePercent,years});
+        document.getElementById('calc-future').textContent = money(result.futureValue);
+        document.getElementById('calc-interest').textContent = money(Math.abs(result.interest));
+        document.getElementById('calc-interest-label').textContent = result.interest < 0 ? '累積損失' : '累積收益';
+        output.classList.toggle('loss',result.interest < 0);
+        output.hidden = false; error.hidden = true; error.textContent = '';
+      } catch (problem) {
+        output.hidden = true; error.hidden = false; error.textContent = problem.message;
+        fields.forEach(field=> { if (field.value.trim()==='' || !field.validity.valid) field.setAttribute('aria-invalid','true'); });
+      }
+    };
+    fields.forEach(field=>field.addEventListener('input',update)); update();
   }
-  function renderLesson(data) {
-    const article = document.getElementById('lesson-article');
-    const toc = document.getElementById('lesson-toc');
-    article.replaceChildren(); toc.replaceChildren();
-    const header = el('header', 'lesson-header');
-    const badge = el('div', 'lesson-index');
-    add(badge, el('span', '', 'NOTE ' + String(data.order).padStart(2,'0')), el('span', '', data.category));
-    add(header, badge, el('h1', '', data.title), el('p', 'lesson-subtitle', data.subtitle));
-    const lead = el('div','lead-question'); add(lead, el('small', '', '先想一個問題'), el('p', '', data.question)); header.append(lead); article.append(header);
-    const names = [['核心直覺','intuitive'],['公式與符號','formula'],['自編例子','example'],['常見誤解','mistakes'],['自我檢核','quiz'],['參考來源','sources']];
-    names.forEach(([name, id], index) => toc.append(link(String(index + 1).padStart(2, '0') + '　' + name, '#section-' + id)));
-    const intuitive = createSection(article, 1, names[0][0], 'section-intuitive');
-    data.intro.forEach(p => intuitive.append(el('p','',p)));
-    const takeaway = el('div','takeaway'); add(takeaway, el('strong', '', '帶走這個觀念：'), document.createTextNode(data.takeaway)); intuitive.append(takeaway);
-    const formula = createSection(article, 2, names[1][0], 'section-formula');
-    formula.append(el('div','formula-box', data.formula.expression));
-    const symbols = el('div','symbol-list');
-    data.formula.symbols.forEach(s => { const item=el('div','symbol-item'); add(item,el('b','',s.symbol),el('span','',s.meaning));symbols.append(item); });
-    formula.append(symbols);
-    const assumptions=el('div','assumptions');assumptions.append(el('strong','','使用前，先確認假設'));
-    const ul=el('ul');data.formula.assumptions.forEach(x=>ul.append(el('li','',x)));assumptions.append(ul);formula.append(assumptions);
-    const example = createSection(article, 3, names[2][0], 'section-example');
-    example.append(el('p','',data.example.intro));
-    const scroll=el('div','table-scroll');const table=el('table','lesson-table');const thead=el('thead');const hrow=el('tr');
-    data.example.headers.forEach(x=>hrow.append(el('th','',x)));thead.append(hrow);
-    const tbody=el('tbody');data.example.rows.forEach(row=>{const tr=el('tr');row.forEach(x=>tr.append(el('td','',x)));tbody.append(tr);});
-    add(table,thead,tbody);scroll.append(table);example.append(scroll);
-    add(example,el('p','',data.example.conclusion),el('p','example-note',data.example.note));
-    if (data.interactive === 'compound') renderCalculator(example);
-    const myths = createSection(article, 4, names[3][0], 'section-mistakes');
-    data.mistakes.forEach((m,i)=>{const item=el('div','myth');add(item,el('b','',String(i+1)+'. '+m.myth),el('p','',m.fact));myths.append(item);});
-    const quiz = createSection(article, 5, names[4][0], 'section-quiz');renderQuiz(quiz,data.quiz);
-    const source = createSection(article, 6, names[5][0], 'section-sources');
-    const sourceList=el('ul','source-list');data.sources.forEach(s=>{
-      const li=el('li');const a=link(s.publisher+' — '+s.title+' ↗',s.url);a.target='_blank';a.rel='noopener noreferrer';
-      add(li,a,el('p','',s.supports));sourceList.append(li);
-    });source.append(sourceList);
-    const nav=el('nav','lesson-next-prev');nav.setAttribute('aria-label','前後篇導覽');
-    const pos=lessons.findIndex(x=>x.id===data.id);const prev=lessons[pos-1];const next=lessons[pos+1];
-    nav.append(prev ? add(link('', '#lesson/'+prev.id),el('small','','← 上一篇'),el('span','',prev.title)) : el('span'));
-    nav.append(next ? add(link('', '#lesson/'+next.id),el('small','','下一篇 →'),el('span','',next.title)) : el('span'));
-    article.append(nav);
-    document.title = data.title + '｜金融概念小教室';
-  }
-  function onRoute() {
-    const hash = decodeURIComponent(location.hash.slice(1));
-    if (hash.startsWith('lesson/')) {
-      home.hidden=true;lessonView.hidden=false;
-      const item=lessons.find(x=>x.id===hash.slice(7));
-      if (item) renderLesson(item);
+
+  function route() {
+    const hash = window.location.hash;
+    if (hash.startsWith('#lesson/')) {
+      const id = hash.slice('#lesson/'.length);
+      const lesson = lessons.find(item=>item.id===id);
+      home.hidden = true; lessonView.hidden = false;
+      if (lesson) renderLesson(lesson);
       else {
-        const article=document.getElementById('lesson-article');article.replaceChildren();
-        const div=el('div','not-found');add(div,el('h1','','找不到這篇筆記'),el('p','','這個連結可能已失效，請回到概念清單選擇文章。'),link('返回概念筆記 ↗','#notebook','btn primary'));article.append(div);
-        document.getElementById('lesson-toc').replaceChildren();document.title='找不到筆記｜金融概念小教室';
+        document.title = '找不到這篇筆記｜金融概念小教室';
+        lessonView.innerHTML = '<div class="shell not-found"><p class="eyebrow">NOTE NOT FOUND</p><h1>找不到這篇筆記</h1><p>這個連結可能已變更，可以從概念清單重新開始。</p><a class="button primary" href="#library">返回概念筆記 ↗</a></div>';
       }
       window.scrollTo({top:0,behavior:'instant'});
+      if (lesson) document.getElementById('lesson-heading').focus({preventScroll:true});
     } else {
-      lessonView.hidden=true;home.hidden=false;document.title='金融概念小教室｜把金融，想明白。';
-      const id=hash||'home';
-      requestAnimationFrame(()=>{ const target=document.getElementById(id);if(target && id!=='home')target.scrollIntoView({behavior:'instant',block:'start'});else if(id==='home')window.scrollTo({top:0,behavior:'instant'}); });
+      home.hidden = false; lessonView.hidden = true;
+      document.title = '金融概念小教室｜把金融，想明白。';
+      requestAnimationFrame(() => {
+        const target = ['#library','#method','#about','#main'].includes(hash) ? document.querySelector(hash) : null;
+        if (target) target.scrollIntoView({block:'start',behavior:'instant'});
+        else window.scrollTo({top:0,behavior:'instant'});
+      });
     }
   }
-  document.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => {
-    category=button.dataset.filter;
-    document.querySelectorAll('[data-filter]').forEach(b=>{b.classList.toggle('active',b===button);b.setAttribute('aria-pressed',String(b===button));});
-    renderCards();
-  }));
-  search.addEventListener('input',renderCards);
-  document.getElementById('reset-filter').addEventListener('click',()=>{
-    category='全部';search.value='';document.querySelectorAll('[data-filter]').forEach(b=>{const active=b.dataset.filter==='全部';b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});renderCards();search.focus();
-  });
-  renderCards();onRoute();window.addEventListener('hashchange',onRoute);
-})();
+  renderCards(); route();
+  window.addEventListener('hashchange',route);
+}());

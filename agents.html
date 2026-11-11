@@ -1,73 +1,52 @@
-<!doctype html><html lang="zh-Hant-TW"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="金融概念小教室的公開專案文件"><title>專案規則｜金融概念小教室</title><link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="docs.css"></head><body><a class="skip-link" href="#doc-main">跳到主要內容</a><header class="site-header"><div class="shell header-inner"><a class="brand" href="index.html#home"><span class="brand-icon" aria-hidden="true">▤</span><span class="brand-words"><strong>金融概念小教室</strong><small>FINANCE NOTES</small></span></a><nav class="main-nav" aria-label="文件導覽"><a href="index.html#notebook">概念筆記</a><a href="agents.html">專案規則</a><a href="readme.html">專案介紹</a></nav></div></header><main id="doc-main" class="doc-main shell"><a class="back-link" href="index.html#about">← 返回關於專案</a><div class="doc-label">PROJECT DOCUMENTATION · UTF-8</div><article class="markdown-body"><h1 id="金融概念小教室專案規則">金融概念小教室｜專案規則</h1>
-<h2 id="1-專案目的與讀者">1. 專案目的與讀者</h2>
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="固定內容格式與開發方式，讓每一篇新筆記都有一致的品質。">
+  <meta name="theme-color" content="#173e32">
+  <title>專案規則｜金融概念小教室</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="document-page">
+  <a class="skip-link" href="#document-content">跳到文件內容</a>
+  <header class="site-header"><div class="shell header-inner">
+    <a class="brand" href="./index.html#home" aria-label="金融概念小教室首頁"><span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M5 6h8c2 0 3 1 3 3v18c0-2-1-3-3-3H5zm22 0h-8c-2 0-3 1-3 3v18c0-2 1-3 3-3h8z"/></svg></span><span class="brand-name">金融概念小教室<small>FINANCE NOTES</small></span></a>
+    <nav class="main-nav" aria-label="主要導覽"><a href="./index.html#library">回到概念筆記 <span aria-hidden="true">↗</span></a></nav>
+  </div></header>
+  <main class="shell document-shell">
+    <div class="document-header"><p class="eyebrow">PROJECT RULES</p><h1>金融概念小教室｜專案規則</h1><p class="document-description">固定內容格式與開發方式，讓每一篇新筆記都有一致的品質。</p>
+      <nav class="document-actions" aria-label="專案文件"><a href="./agents.html" aria-current="page">專案規則</a><a href="./readme.html">專案介紹</a><a class="document-download" href="./AGENTS.md" download="AGENTS.md">下載 AGENTS.md <span aria-hidden="true">↓</span></a></nav>
+    </div>
+    <div class="document-grid"><nav class="document-toc" aria-label="本頁章節"><p class="eyebrow">本頁內容</p><ol><li><a href="#section-1">1. 專案目的與讀者</a></li><li><a href="#section-2">2. 技術與檔案位置</a></li><li><a href="#section-3">3. 視覺與閱讀結構</a></li><li><a href="#section-4">4. 文章資料格式</a></li><li><a href="#section-5">5. 內容與計算規則</a></li><li><a href="#section-6">6. 互動行為</a></li><li><a href="#section-7">7. 新增一篇內容的流程</a></li><li><a href="#section-8">8. 完成標準與修改範圍</a></li></ol></nav>
+      <article id="document-content" class="document-body" tabindex="-1" aria-label="專案規則全文">
+<h2 id="section-1">1. 專案目的與讀者</h2>
 <p>這是一個給大學生閱讀的金融入門網站。我希望把常見觀念整理成能理解、能計算，也能辨認誤解的短篇筆記。網站使用台灣繁體中文，語氣自然、清楚，從生活問題切入，再交代公式與限制。</p>
 <p>新增或修改本專案前，先閱讀本文件，再檢查實際檔案。本文件描述的規則必須與網站一致；修改結構時，同步更新受影響的文件與測試。</p>
-<h2 id="2-技術與檔案位置">2. 技術與檔案位置</h2>
-<ul>
-<li>使用 HTML、CSS、原生 JavaScript；網站瀏覽不需 API、登入、金鑰或外部套件。</li>
-<li><code>index.html</code>：共用頁面外框、首頁、概念清單、關於專案及文章容器。</li>
-<li><code>styles.css</code>：所有版面、色彩、字級、響應式與焦點樣式。</li>
-<li><code>content.js</code>：所有文章資料；指定 <code>window.FINANCE_LESSONS</code> 陣列。</li>
-<li><code>math.js</code>：複利計算與輸入驗證，供網頁和 Node 測試共用。</li>
-<li><code>app.js</code>：資料呈現、搜尋、分類、文章切換、自我檢核與試算互動。</li>
-<li><code>tests/check.mjs</code>：資料格式、公式結果、輸入邊界、內部資源與必要規則檢查。</li>
-<li><code>scripts/build.mjs</code>：只把網站需要的確切檔案複製到 <code>dist/</code>，不修改來源。</li>
-<li><code>README.md</code>：專案簡介、功能、執行方式及實際延伸紀錄。</li>
-<li><code>dist/</code>：發布產物，由建置產生，不手動修改。GitHub Pages 也可直接發布根目錄的 <code>index.html</code>。</li>
-<li><code>agents.html</code>、<code>readme.html</code>：可直接閱讀的規則與介紹網頁，由建置程式產生。</li>
-<li><code>favicon.svg</code>：簡單的書本識別圖示。</li>
-<li><code>.nojekyll</code>：讓 GitHub Pages 按原有靜態檔案提供頁面。</li>
-</ul>
+<h2 id="section-2">2. 技術與檔案位置</h2>
+<ul><li>使用 HTML、CSS、原生 JavaScript；網站瀏覽不需 API、登入、金鑰或外部套件。</li><li><code>index.html</code>：共用頁面外框、首頁、概念清單、關於專案及文章容器。</li><li><code>styles.css</code>：所有版面、色彩、字級、響應式與焦點樣式。</li><li><code>content.js</code>：所有文章資料；指定 <code>window.FINANCE_LESSONS</code> 陣列。</li><li><code>math.js</code>：複利計算與輸入驗證，供網頁和 Node 測試共用。</li><li><code>app.js</code>：資料呈現、搜尋、分類、文章切換、自我檢核與試算互動。</li><li><code>tests/check.mjs</code>：資料格式、公式結果、輸入邊界、內部資源與必要規則檢查。</li><li><code>scripts/documents.mjs</code>：以 <code>AGENTS.md</code>、<code>README.md</code> 產生 <code>agents.html</code>、<code>readme.html</code>，只更新這兩份閱讀頁。</li><li><code>agents.html</code>、<code>readme.html</code>：公開文件的閱讀頁，不手動修改正文；修改 Markdown 後重新產生。</li><li><code>scripts/build.mjs</code>：確認閱讀頁與 Markdown 一致，再把網站需要的確切檔案複製到 <code>dist/</code>，不修改來源。</li><li><code>README.md</code>：專案簡介、功能、執行方式及實際延伸紀錄。</li><li><code>dist/</code>：發布產物，由建置產生，不手動修改。GitHub Pages 也可直接發布根目錄的 <code>index.html</code>。</li><li><code>scripts/document-template.html</code>：兩份文件閱讀頁共用的原版版型；只在調整文件版型時修改。</li><li><code>.nojekyll</code>：GitHub Pages 的靜態網站設定，保留此空白檔案。</li></ul>
 <p>檔名採小寫英文及連字號。新增文章通常只修改 <code>content.js</code>；不得為每篇複製一套 CSS、頁面模板或互動程式。</p>
-<h2 id="3-視覺與閱讀結構">3. 視覺與閱讀結構</h2>
-<ul>
-<li>主色為深綠，搭配米白背景、淡綠重點及少量暖橘提示。使用系統字型，維持文字對比與明顯的鍵盤焦點。</li>
-<li>首頁依序為專案介紹、概念清單、學習方式、關於專案。文章卡片保留編號、分類、標題、摘要與閱讀連結。</li>
-<li>每篇固定依序呈現：生活問題、核心直覺、公式與符號、自編例子、常見誤解、自我檢核、參考來源。</li>
-<li>電腦版可使用側邊章節導覽；手機版保持單欄閱讀，不以縮小整頁或水平捲動處理內容。</li>
-<li>表格放在可水平捲動的獨立容器，其他內容不得超出畫面。按鈕、表單與連結必須可用鍵盤操作。</li>
-<li>視覺必須幫助理解；圖表或數值示意須與計算相符，不放無關裝飾圖片。</li>
-<li>文章與文件正文桌面版以約 17px、窄版至少 16px 顯示，網站摘要與主要操作文字至少 16px；次要資訊約 12–14px，但不取代主要說明。</li>
-<li>四篇筆記卡片之後顯示「更多金融筆記，陸續整理中。」提示；使用搜尋或分類篩選時隱藏此提示，不把尚未建立的內容計入文章數。</li>
-</ul>
-<h2 id="4-文章資料格式">4. 文章資料格式</h2>
+<h2 id="section-3">3. 視覺與閱讀結構</h2>
+<ul><li>主色為深綠，搭配米白背景、淡綠重點及少量暖橘提示。使用系統字型，維持文字對比與明顯的鍵盤焦點。</li><li>首頁依序為專案介紹、概念清單、學習方式、關於專案。文章卡片保留編號、分類、標題、摘要與閱讀連結。概念清單後的持續整理提示獨立呈現，不當成文章，不加入篇數、搜尋結果或文章資料；只有全部分類且搜尋空白時顯示。</li><li>正文以桌機 17px、窄螢幕 16px 為基準；首頁摘要與說明使用 16px。導覽、表單、必要註解至少 14px；分類、篇數與頁尾使用 12～13px，英文輔助眉題可用 11～12px。放大文字時同步調整留白與換行，不把必要說明縮成難以閱讀的小字。</li><li>每篇固定依序呈現：生活問題、核心直覺、公式與符號、自編例子、常見誤解、自我檢核、參考來源。</li><li>電腦版可使用側邊章節導覽；手機版保持單欄閱讀，不以縮小整頁或水平捲動處理內容。</li><li>表格放在可水平捲動的獨立容器，其他內容不得超出畫面。按鈕、表單與連結必須可用鍵盤操作。</li><li>視覺必須幫助理解；圖表或數值示意須與計算相符，不放無關裝飾圖片。</li><li>公開頁面、文件、網頁描述與下載檔案只以作者姓名署名，不列學校、系級、學號或其他交件身分資料。完整課程身分資料僅填於 NTU COOL，不加入公開原始碼或測試範例。</li></ul>
+<h2 id="section-4">4. 文章資料格式</h2>
 <p><code>content.js</code> 中每筆文章須具有下列欄位；新增欄位前需同步修改使用它的程式、本文與測試。</p>
-<div class="md-table-scroll"><table><thead><tr><th>欄位</th><th>格式與規則</th></tr></thead><tbody><tr><td><code>id</code></td><td>唯一的小寫英文連字號識別碼；須與 <code>^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$</code> 相符</td></tr><tr><td><code>order</code></td><td>唯一的正整數；首頁依此排序</td></tr><tr><td><code>category</code></td><td><code>時間與價值</code>、<code>風險與配置</code>、<code>債券入門</code> 擇一</td></tr><tr><td><code>title</code>、<code>subtitle</code>、<code>summary</code>、<code>question</code></td><td>非空白字串；摘要簡短，生活問題應可引出核心機制</td></tr><tr><td><code>intro</code></td><td>至少兩段非空白字串，先說直覺，再說推理或適用限制</td></tr><tr><td><code>takeaway</code></td><td>一句能帶走的核心結論</td></tr><tr><td><code>formula</code></td><td>包含 <code>expression</code> 字串、<code>symbols</code> 陣列（每筆有 <code>symbol</code>、<code>meaning</code>）、<code>assumptions</code> 非空字串陣列</td></tr><tr><td><code>example</code></td><td>包含 <code>intro</code>、<code>headers</code>、<code>rows</code>、<code>conclusion</code>、<code>note</code>；每一列欄數須與表頭相同，並明示自編或假設情境</td></tr><tr><td><code>mistakes</code></td><td>至少兩筆 <code>{ myth, fact }</code>，逐一說清楚錯在哪裡</td></tr><tr><td><code>quiz</code></td><td>包含 <code>question</code>、恰好四筆 <code>options</code>（每筆有 <code>text</code>、<code>explanation</code>），以及整數 <code>answer</code>（0 到 3）</td></tr><tr><td><code>sources</code></td><td>至少一筆 <code>{ publisher, title, url, supports }</code>；使用已核對的 HTTPS 一級來源，說明支持範圍</td></tr><tr><td><code>interactive</code></td><td><code>compound</code> 或 <code>none</code>；只有適合單筆複利的文章使用 <code>compound</code></td></tr></tbody></table></div>
+<div class="table-wrap document-table" role="region" aria-label="4. 文章資料格式表格" tabindex="0"><table><thead><tr><th scope="col">欄位</th><th scope="col">格式與規則</th></tr></thead><tbody><tr><td><code>id</code></td><td>唯一的小寫英文連字號識別碼；須與 <code>^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$</code> 相符</td></tr><tr><td><code>order</code></td><td>唯一的正整數；首頁依此排序</td></tr><tr><td><code>category</code></td><td><code>時間與價值</code>、<code>風險與配置</code>、<code>債券入門</code> 擇一</td></tr><tr><td><code>title</code>、<code>subtitle</code>、<code>summary</code>、<code>question</code></td><td>非空白字串；摘要簡短，生活問題應可引出核心機制</td></tr><tr><td><code>intro</code></td><td>至少兩段非空白字串，先說直覺，再說推理或適用限制</td></tr><tr><td><code>takeaway</code></td><td>一句能帶走的核心結論</td></tr><tr><td><code>formula</code></td><td>包含 <code>expression</code> 字串、<code>symbols</code> 陣列（每筆有 <code>symbol</code>、<code>meaning</code>）、<code>assumptions</code> 非空字串陣列</td></tr><tr><td><code>example</code></td><td>包含 <code>intro</code>、<code>headers</code>、<code>rows</code>、<code>conclusion</code>、<code>note</code>；每一列欄數須與表頭相同，並明示自編或假設情境</td></tr><tr><td><code>mistakes</code></td><td>至少兩筆 <code>{ myth, fact }</code>，逐一說清楚錯在哪裡</td></tr><tr><td><code>quiz</code></td><td>包含 <code>question</code>、恰好四筆 <code>options</code>（每筆有 <code>text</code>、<code>explanation</code>），以及整數 <code>answer</code>（0 到 3）</td></tr><tr><td><code>sources</code></td><td>至少一筆 <code>{ publisher, title, url, supports }</code>；使用已核對的 HTTPS 一級來源，說明支持範圍</td></tr><tr><td><code>interactive</code></td><td><code>compound</code> 或 <code>none</code>；只有適合單筆複利的文章使用 <code>compound</code></td></tr></tbody></table></div>
+<p class="document-table-hint">窄螢幕可在表格內左右滑動。</p>
 <p>所有文字欄位只存純文字，不存 HTML、腳本、事件處理器或 Markdown。呈現時必須以文字節點或安全的轉義處理，禁止直接執行文章內容。</p>
-<h2 id="5-內容與計算規則">5. 內容與計算規則</h2>
-<ul>
-<li>優先使用官方教育資料或原始教材，保留機構、標題、網址與支持的觀念。來源只提供依據，正文使用自己的說明，不抄寫段落。</li>
-<li>所有自編數值、機率與案例明確標為教學假設；不得寫成真實行情、個人操作經驗或保證報酬。</li>
-<li>先解釋符號及期間，再使用公式。百分數顯示為 <code>%</code>，計算時轉為小數；利率期間與期數必須一致。</li>
-<li>金額使用 <code>NT$</code> 與千分位；計算過程保留精度，顯示至小數點後兩位，整數可省略小數。</li>
-<li>單筆複利使用 <code>FV = PV × (1 + r)^n</code>，並說明利息留存、沒有額外投入或提領及忽略稅費。</li>
-<li>期望報酬為機率加權平均；機率合計須為 1，不能把平均結果當成保證結果。</li>
-<li>固定利率債券的價格與市場要求報酬率反向，須加上其他條件不變的前提；票息與市場利率須明確區分。</li>
-<li>分散效果取決於資產共同變動，不能聲稱分散可以保證獲利或消除所有風險。</li>
-<li>不加入個別商品推薦、交易指令、即時行情、會員或付費功能。</li>
-</ul>
-<h2 id="6-互動行為">6. 互動行為</h2>
-<ul>
-<li>首頁搜尋同時比對標題、摘要與分類，可與分類篩選合併；沒有結果時顯示清楚訊息及重設操作。</li>
-<li>文章使用 <code>#lesson/&lt;id&gt;</code> 切換；重新整理、直接進入網址與瀏覽器上一頁都應維持正確內容。找不到文章時提供返回概念清單的連結。</li>
-<li>自我檢核先選四個選項之一，再按確認；提交前不公布答案。提交後指出正確選項並解釋各選項，可重新作答。</li>
-<li>複利試算的本金範圍為 0 至 100,000,000；年利率範圍為 -50% 至 50%；年數為 0 至 50 的整數。空白、非有限數值與超出範圍的輸入須顯示錯誤並隱藏舊結果。</li>
-<li>試算的 0% 利率、0 年與 0 本金須正常運算；負報酬顯示損失。輸入不會傳到伺服器，不儲存個人資料。</li>
-</ul>
-<h2 id="7-新增一篇內容的流程">7. 新增一篇內容的流程</h2>
-<p>1. 先檢查現有資料格式、分類與識別碼，確認新主題不重複。</p>
-<p>2. 核對來源，設計能自行驗算的例子和一題四選一，完整填寫第 4 節欄位。</p>
-<p>3. 在 <code>content.js</code> 加入一筆新資料，保留既有文章的 <code>id</code>、順序與正確內容。若只新增同型內容，不改頁面模板。</p>
-<p>4. 執行 <code>node tests/check.mjs</code> 與 <code>node scripts/build.mjs</code>；失敗時先修正原因，不以刪除檢查或改寫預期值掩蓋問題。</p>
-<p>5. 在瀏覽器檢查新文章、首頁排序與數量、搜尋、分類、前後篇導覽、四選一回饋及參考來源；也抽查既有文章與手機畫面。</p>
-<p>6. 依實際完成情況更新 <code>README.md</code> 的延伸紀錄；未執行的檢查不能寫成已通過。</p>
-<h2 id="8-公開資訊與隱私">8. 公開資訊與隱私</h2>
-<ul>
-<li>公開網站、<code>AGENTS.md</code>、<code>README.md</code>、範例程式碼、下載包、頁面中繼資料與 GitHub Repository 只保留作者姓名「林泓基」。不要放入學校、學號、系級、個人聯絡方式或其他不必要的學籍資料。</li>
-<li>若課程繳交平台要求完整學籍資訊，僅在該平台的指定繳交欄位填寫，不寫回公開原始碼或網站內容。</li>
-<li>新增文章或修改版型後，檢查公開檔案與發布目錄是否再次引入不必要的個人資料。</li>
-</ul>
-<h2 id="9-完成標準與修改範圍">9. 完成標準與修改範圍</h2>
+<h2 id="section-5">5. 內容與計算規則</h2>
+<ul><li>優先使用官方教育資料或原始教材，保留機構、標題、網址與支持的觀念。來源只提供依據，正文使用自己的說明，不抄寫段落。</li><li>所有自編數值、機率與案例明確標為教學假設；不得寫成真實行情、個人操作經驗或保證報酬。</li><li>先解釋符號及期間，再使用公式。百分數顯示為 <code>%</code>，計算時轉為小數；利率期間與期數必須一致。</li><li>金額使用 <code>NT$</code> 與千分位；計算過程保留精度，顯示至小數點後兩位，整數可省略小數。</li><li>單筆複利使用 <code>FV = PV × (1 + r)^n</code>，並說明利息留存、沒有額外投入或提領及忽略稅費。</li><li>期望報酬為機率加權平均；機率合計須為 1，不能把平均結果當成保證結果。</li><li>固定利率債券的價格與市場要求報酬率反向，須加上其他條件不變的前提；票息與市場利率須明確區分。</li><li>分散效果取決於資產共同變動，不能聲稱分散可以保證獲利或消除所有風險。</li><li>不加入個別商品推薦、交易指令、即時行情、會員或付費功能。</li></ul>
+<h2 id="section-6">6. 互動行為</h2>
+<ul><li>首頁搜尋同時比對標題、摘要與分類，可與分類篩選合併；沒有結果時顯示清楚訊息及重設操作。</li><li>文章使用 <code>#lesson/&lt;id&gt;</code> 切換；重新整理、直接進入網址與瀏覽器上一頁都應維持正確內容。找不到文章時提供返回概念清單的連結。</li><li>自我檢核先選四個選項之一，再按確認；提交前不公布答案。提交後指出正確選項並解釋各選項，可重新作答。</li><li>複利試算的本金範圍為 0 至 100,000,000；年利率範圍為 -50% 至 50%；年數為 0 至 50 的整數。空白、非有限數值與超出範圍的輸入須顯示錯誤並隱藏舊結果。</li><li>試算的 0% 利率、0 年與 0 本金須正常運算；負報酬顯示損失。輸入不會傳到伺服器，不儲存個人資料。</li></ul>
+<h2 id="section-7">7. 新增一篇內容的流程</h2>
+<ol><li>先檢查現有資料格式、分類與識別碼，確認新主題不重複。</li><li>核對來源，設計能自行驗算的例子和一題四選一，完整填寫第 4 節欄位。</li><li>在 <code>content.js</code> 加入一筆新資料，保留既有文章的 <code>id</code>、順序與正確內容。若只新增同型內容，不改頁面模板。</li><li>若修改 Markdown，先執行 <code>node scripts/documents.mjs</code> 同步閱讀頁。再執行 <code>node tests/check.mjs</code> 與 <code>node scripts/build.mjs</code>；失敗時先修正原因，不以刪除檢查或改寫預期值掩蓋問題。</li><li>在瀏覽器檢查新文章、首頁排序與數量、搜尋、分類、前後篇導覽、四選一回饋及參考來源；也抽查既有文章與手機畫面。</li><li>依實際完成情況更新 <code>README.md</code> 的延伸紀錄；未執行的檢查不能寫成已通過。</li></ol>
+<h2 id="section-8">8. 完成標準與修改範圍</h2>
 <p>文章內容、網站呈現與本文件須互相一致。交付前，重新讀取最終檔案並確認語法、來源連結格式、計算、互動與發布檔案。瀏覽器測試與靜態測試分開記錄。</p>
+<p>首頁的文件入口使用含 UTF-8 宣告的 HTML 閱讀頁，保留章節導覽、標題、清單與表格，並提供 Markdown 原始檔下載。Markdown 使用 UTF-8 編碼，開頭保留單一 BOM 編碼標記，避免瀏覽器誤判中文編碼。文件使用標題、段落、清單、表格及行內程式碼；需要其他格式時，先更新閱讀頁產生方式與檢查。發布前需實際開啟首頁及兩份閱讀頁，檢查文字、連結與窄螢幕版面，不能只確認檔案存在。</p>
 <p>新增或修正只修改本專案內的必要檔案；不改其他專案、不刪除既有內容、不寫入密碼或 API 金鑰。發布狀態與 GitHub 上傳狀態依實際結果記錄，尚未完成時保持明確。</p>
-</article><div class="doc-bottom"><a href="AGENTS.md" download>下載 AGENTS.md</a><a href="README.md" download>下載 README.md</a></div></main><footer class="footer"><div class="shell footer-inner"><span>金融概念小教室 ／ FINANCE NOTES</span><span>2026 · 作者 林泓基</span></div></footer></body></html>
+</article>
+    </div>
+    <a class="back-link document-back" href="./index.html#about"><span aria-hidden="true">←</span> 回到關於專案</a>
+  </main>
+  <footer class="site-footer"><div class="shell footer-inner"><span>金融概念小教室 <span class="footer-separator">／</span> FINANCE NOTES</span><span>製作：林泓基</span></div></footer>
+</body>
+</html>

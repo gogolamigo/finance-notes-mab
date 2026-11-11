@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="{{DESCRIPTION}}">
+  <meta name="theme-color" content="#173e32">
+  <title>{{TITLE}}｜金融概念小教室</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="document-page">
+  <a class="skip-link" href="#document-content">跳到文件內容</a>
+  <header class="site-header"><div class="shell header-inner">
+    <a class="brand" href="./index.html#home" aria-label="金融概念小教室首頁"><span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M5 6h8c2 0 3 1 3 3v18c0-2-1-3-3-3H5zm22 0h-8c-2 0-3 1-3 3v18c0-2 1-3 3-3h8z"/></svg></span><span class="brand-name">金融概念小教室<small>FINANCE NOTES</small></span></a>
+    <nav class="main-nav" aria-label="主要導覽"><a href="./index.html#library">回到概念筆記 <span aria-hidden="true">↗</span></a></nav>
+  </div></header>
+  <main class="shell document-shell">
+    <div class="document-header"><p class="eyebrow">{{EYEBROW}}</p><h1>{{H1}}</h1><p class="document-description">{{DESCRIPTION}}</p>
+      <nav class="document-actions" aria-label="專案文件"><a href="./agents.html"{{AGENTS_CURRENT}}>專案規則</a><a href="./readme.html"{{README_CURRENT}}>專案介紹</a><a class="document-download" href="./{{MARKDOWN}}" download="{{MARKDOWN}}">下載 {{MARKDOWN}} <span aria-hidden="true">↓</span></a></nav>
+    </div>
+    <div class="document-grid"><nav class="document-toc" aria-label="本頁章節"><p class="eyebrow">本頁內容</p><ol>{{TOC}}</ol></nav>
+      <article id="document-content" class="document-body" tabindex="-1" aria-label="{{TITLE}}全文">
+{{BODY}}
+</article>
+    </div>
+    <a class="back-link document-back" href="./index.html#about"><span aria-hidden="true">←</span> 回到關於專案</a>
+  </main>
+  <footer class="site-footer"><div class="shell footer-inner"><span>金融概念小教室 <span class="footer-separator">／</span> FINANCE NOTES</span><span>製作：林泓基</span></div></footer>
+</body>
+</html>
