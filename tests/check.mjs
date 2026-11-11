@@ -4,7 +4,7 @@ import {dirname,resolve,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import vm from 'node:vm';
 import {createRequire} from 'node:module';
-import {generatedDocuments,renderMarkdown} from '../scripts/documents.mjs';
+import {generatedDocuments,renderMarkdown,renderTemplate} from '../scripts/documents.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..'),require=createRequire(import.meta.url);
 let count=0;const check=(name,fn)=>{fn();count++;console.log('PASS '+name);};
 const context=vm.createContext({window:{}});vm.runInContext(readFileSync(join(root,'content.js'),'utf8'),context,{timeout:1000});
@@ -48,6 +48,14 @@ check('upper accepted boundary',()=>assert.ok(Number.isFinite(compound({principa
 for(const name of ['content.js','math.js','app.js'])check('syntax '+name,()=>new vm.Script(readFileSync(join(root,name),'utf8')));
 for(const name of ['AGENTS.md','README.md'])check('UTF-8 BOM '+name,()=>{const s=readFileSync(join(root,name),'utf8');assert.ok(s.startsWith('\uFEFF')&&!s.startsWith('\uFEFF\uFEFF'));assert.ok(!s.includes('\uFFFD'));});
 for(const doc of generatedDocuments())check('generated '+doc.html,()=>assert.equal(readFileSync(join(root,doc.html),'utf8'),doc.content));
+check('template digit token',()=>assert.equal(renderTemplate('<h1>{{H1}}</h1>',{H1:'Title'}),'<h1>Title</h1>'));
+check('template underscore token',()=>assert.equal(renderTemplate('{{CURRENT_PAGE}}',{CURRENT_PAGE:'yes'}),'yes'));
+check('template unknown token stops',()=>assert.throws(()=>renderTemplate('{{UNKNOWN2}}',{})));
+check('template malformed token stops',()=>assert.throws(()=>renderTemplate('{{H1}',{H1:'Title'})));
+for(const [md,html] of [['AGENTS.md','agents.html'],['README.md','readme.html']])check('visible heading '+html,()=>{
+ const title=/^# (.+)$/m.exec(readFileSync(join(root,md),'utf8').replace(/^\uFEFF/,''))[1];
+ const output=readFileSync(join(root,html),'utf8');assert.ok(output.includes('<h1>'+title+'</h1>'));assert.ok(!/\{\{|\}\}/.test(output));
+});
 for(const name of ['index.html','agents.html','readme.html'])check('HTML resource graph '+name,()=>{
  const html=readFileSync(join(root,name),'utf8');assert.match(html,/<meta charset="utf-8">/);assert.ok(!html.includes('/cdn-cgi/'));
  for(const m of html.matchAll(/(?:href|src)="([^"#]+)(?:#[^"]*)?"/g)){

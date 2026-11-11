@@ -7,17 +7,17 @@ EXPECTED={
 '.nojekyll':'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
 'AGENTS.md':'519b5c0d734f5a22765763c6a4b04f3295a7d2b1a14944c225d9acc7741e166e',
 'README.md':'15668b2458892f401ebcbca91d923a5f0d0c3ca41fbc9d32d19f07d2250fe164',
-'agents.html':'fc2533dc0f71deebc1f070e257c85516664e622a283db9c870f4eaefc57ccbcc',
+'agents.html':'f0be3730563470a2f916dfcf6126ddde84431b93cbaef0203ab922f0178b48a8',
 'app.js':'959b71172ead4d5eefbe0db71482826e60e37a9449e829ae20d65b0b87e30864',
 'content.js':'0b981b560690224b811773d6f3b4f12c92bed601704118bec1cbafd98582f2dd',
 'index.html':'63a41ccc0a56fd54f9975586bcd3aeb6c11e472019cd90b4f1ea0060311c33d9',
 'math.js':'940ee366385001b69c93bd093eda016a9c2cd23dca4f470c5e2520e8b74ee43f',
-'readme.html':'47133eee0d9593654accf3c82fb87ffa0ca84117ce755406179dee16ebc89b10',
+'readme.html':'4cf828f7e4d250801baab8f23788902f59891b99b654f5487cb0947c903fc632',
 'scripts/build.mjs':'2c480e995469d9ccb28a570dea1337edf751d1c48453ffa4b943cc55b68f4e6c',
 'scripts/document-template.html':'b4ecb843671ae19217b9f368a392f31e21428ef254749b2451c4f99803a3fa16',
-'scripts/documents.mjs':'157b4e1605c4ae83fb29b5892f5e93b3ea2796d9d0ffbbccac108d828fb49473',
+'scripts/documents.mjs':'686075b95aeab1ed9806d8d0b2681c06c8a242ca9d0f161eb5c86ca3db1d18cf',
 'styles.css':'c62bb029f7f4eaefc2dc27f9ebbba9ca28734e31810606cc317181d0fa6c9a44',
- 'tests/check.mjs':'cede119c7638e1b9a55f847b7e9ca8a24a75e523f66f839cab6f9cdc1c0b87b3'}
+ 'tests/check.mjs':'e12e622c63629947381fb41f90513db3b2912e5a688c14d04d3b45de807acacf'}
 observations=[]
 for name in PUBLIC:
  if name=='.nojekyll':Path(name).write_bytes(b'');continue

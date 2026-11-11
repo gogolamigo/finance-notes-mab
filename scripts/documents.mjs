@@ -35,12 +35,17 @@ const specs=[
  {md:'AGENTS.md',html:'agents.html',title:'專案規則',eyebrow:'PROJECT RULES',description:'固定內容格式與開發方式，讓每一篇新筆記都有一致的品質。'},
  {md:'README.md',html:'readme.html',title:'專案介紹',eyebrow:'ABOUT THE NOTEBOOK',description:'從金融觀念到網站結構，看看這本筆記如何持續增加內容。'}
 ];
+export function renderTemplate(template,values){
+ const html=template.replace(/\{\{([^{}]+)\}\}/g,(_,key)=>{if(!Object.hasOwn(values,key))throw Error('Unknown template token '+key);return values[key];});
+ if(/\{\{|\}\}/.test(html))throw Error('Unresolved template token');
+ return html;
+}
 export function generatedDocuments(){
  const template=readFileSync(join(root,'scripts/document-template.html'),'utf8');
  return specs.map(spec=>{
   const parsed=renderMarkdown(readFileSync(join(root,spec.md),'utf8'));
   const values={TITLE:escape(spec.title),H1:inline(parsed.title),EYEBROW:spec.eyebrow,DESCRIPTION:escape(spec.description),MARKDOWN:spec.md,BODY:parsed.body,TOC:parsed.toc,AGENTS_CURRENT:spec.html==='agents.html'?' aria-current="page"':'',README_CURRENT:spec.html==='readme.html'?' aria-current="page"':''};
-  const html=template.replace(/\{\{([A-Z_]+)\}\}/g,(_,key)=>{if(!(key in values))throw Error('Unknown template token '+key);return values[key];});
+  const html=renderTemplate(template,values);
   return {...spec,content:html};
  });
 }
