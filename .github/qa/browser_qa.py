@@ -114,7 +114,10 @@ try:
         check('invalid hides stale result '+selector+' '+value,target.locator('#calc-output').is_hidden() and target.locator('#calc-error').is_visible())
     target.goto(urljoin(a.target,'#lesson/not-a-real-note'),wait_until='load')
     check('invalid article safe',target.locator('.not-found').is_visible())
-    target.locator('.not-found a').click();check('invalid article return',target.locator('#home-view').is_visible())
+    target.locator('.not-found a').click()
+    target.wait_for_url('**/#library',timeout=5000)
+    target.locator('#home-view').wait_for(state='visible',timeout=5000)
+    check('invalid article return',target.locator('#home-view').is_visible() and target.locator('.lesson-card').count()==4)
     check('no runtime exceptions',not errors,errors)
     browser.close()
  report['status']='PASS'
