@@ -1,0 +1,106 @@
+name: Verify restored public GitHub Pages
+on:
+  push:
+    branches: [repair/original-design-20261112]
+    paths: [.github/workflows/verify-live.yml]
+permissions:
+  contents: read
+jobs:
+  live:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 0d22ad13517476184da017ab7b2281d895cd78e4
+          path: published
+      - name: Prepare browser and verify published source identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python -m pip install playwright==1.57.0 Pillow==11.3.0
+          python -m playwright install --with-deps chromium
+          sudo apt-get install -y fonts-noto-cjk
+          fc-list :lang=zh > evidence/browser-fonts.txt
+          test "$(git -C published rev-parse HEAD)" = 0d22ad13517476184da017ab7b2281d895cd78e4
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = 0d22ad13517476184da017ab7b2281d895cd78e4
+          python - <<'PY'
+          import ast,hashlib,json,subprocess
+          from pathlib import Path
+          expected={}
+          for n in ast.parse(Path('.github/qa/restore.py').read_text()).body:
+              if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='EXPECTED' for t in n.targets):expected=ast.literal_eval(n.value)
+          tracked=subprocess.check_output(['git','-C','published','ls-files'],text=True).splitlines()
+          assert set(tracked)==set(expected)
+          observed={n:hashlib.sha256((Path('published')/n).read_bytes()).hexdigest() for n in tracked}
+          assert observed==expected
+          Path('evidence/published-source.json').write_text(json.dumps({'commit':'0d22ad13517476184da017ab7b2281d895cd78e4','files':observed},indent=2))
+          PY
+          (cd published && node tests/check.mjs && node scripts/build.mjs) | tee evidence/published-static-checks.txt
+      - name: Verify live transfers before and after real public browser interaction
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import ast,hashlib,json,subprocess,re
+          from collections import deque
+          from html.parser import HTMLParser
+          from pathlib import Path
+          from urllib.parse import urljoin,urlsplit,urldefrag
+          from urllib.request import Request,urlopen
+          BASE='https://gogolamigo.github.io/finance-notes-mab/'
+          OUT=Path('evidence');OUT.mkdir(exist_ok=True)
+          expected={}
+          for n in ast.parse(Path('.github/qa/restore.py').read_text()).body:
+              if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='EXPECTED' for t in n.targets):expected=ast.literal_eval(n.value)
+          assert expected
+          class Links(HTMLParser):
+              def __init__(self):super().__init__();self.links=[]
+              def handle_starttag(self,tag,attrs):
+                  for key,value in attrs:
+                      if key in ('href','src') and value:self.links.append(value)
+          before=[];after=[]
+          for phase,results in [('before',before),('after',after)]:
+              if phase=='after':
+                  subprocess.run(['python','.github/qa/browser_qa.py','--source','https://finance-notes-hongji-2026.amusingbroom4.chatgpt.site/','--target',BASE,'--output','evidence/live'],check=True)
+              q=deque([BASE]);seen=set()
+              while q:
+                  url=q.popleft()
+                  if url in seen:continue
+                  seen.add(url);assert len(seen)<30
+                  with urlopen(Request(url,headers={'Cache-Control':'no-cache','User-Agent':'FinanceNotes-Live-QA/1.0'}),timeout=30) as r:
+                      assert r.status==200 and r.url.startswith(BASE)
+                      data=r.read(2000001);assert len(data)<2000000
+                      name=urlsplit(url).path[len(urlsplit(BASE).path):] or 'index.html'
+                      assert name in expected,'Unexpected runtime resource: '+name
+                      digest=hashlib.sha256(data).hexdigest()
+                      results.append({'url':url,'path':name,'status':r.status,'sha256':digest,'expected_sha256':expected[name],'match':digest==expected[name],'bytes':len(data),'content_type':r.headers.get('Content-Type')})
+                      assert digest==expected[name],'Live bytes mismatch: '+name
+                  if name.endswith('.html'):
+                      parser=Links();parser.feed(data.decode('utf-8-sig'));links=parser.links
+                  elif name.endswith('.css'):
+                      links=re.findall(r'url\([\s\"\x27]*([^\s\"\x27)]+)',data.decode('utf-8-sig'))
+                  else:links=[]
+                  for link in links:
+                      if link.startswith(('#','data:','mailto:')):continue
+                      dest=urldefrag(urljoin(url,link))[0]
+                      if urlsplit(dest).netloc!=urlsplit(BASE).netloc:continue
+                      assert dest.startswith(BASE),'Resource escaped repository subpath'
+                      q.append(dest)
+              (OUT/('live-byte-check-'+phase+'.json')).write_text(json.dumps(results,ensure_ascii=False,indent=2))
+              assert set(x['path'] for x in results)=={'index.html','styles.css','math.js','content.js','app.js','agents.html','readme.html','AGENTS.md','README.md'}
+              print(phase,'verified runtime resource graph',len(results),'requests')
+          report={'base':BASE,'status':'PASS','before':before,'after':after}
+          (OUT/'live-transfer-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = 0d22ad13517476184da017ab7b2281d895cd78e4
+      - name: Preserve actual public screenshots and final-byte observations
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: restoration-live-evidence
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 7
